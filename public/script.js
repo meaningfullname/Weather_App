@@ -1,6 +1,7 @@
 let country = document.querySelector("#country");
 let city = document.querySelector("#city");
 let check = document.querySelector("#check");
+let checkForecast = document.querySelector("#checkForecast"); // New button
 let tempIcon = document.querySelector("#tempIcon");
 let weatherCountry = document.querySelector("#weatherCountry");
 let temperature = document.querySelector("#temperature");
@@ -9,7 +10,7 @@ let feelsLike = document.querySelector("#feelsLike");
 let humidity = document.querySelector("#humidity");
 let longitude = document.querySelector("#longitude");
 let latitude = document.querySelector("#latitude");
-
+let forecast = document.querySelector("#forecast"); // Forecast display area
 
 let map = L.map('map').setView([0, 0], 2);
 
@@ -57,6 +58,34 @@ check.addEventListener("click", () => {
         L.marker([data.coord.lat, data.coord.lon]).addTo(map)
             .bindPopup(`<b style="color:black">${data.name}</b><br><b style="color:black">Temperature: ${data.main.temp}°C</b>`)
             .openPopup();
+    });
+
+    country.value = "";
+    city.value = "";
+});
+
+// New functionality for 5-day forecast
+checkForecast.addEventListener("click", () => {
+    let key = `e56df16206795e4484573165adc16a86`;
+    let url = `https://api.openweathermap.org/data/2.5/forecast?q=${city.value},${country.value}&lang=en&units=metric&appid=${key}`;
+
+    fetch(url).then(response => response.json()).then(data => {
+        console.log("Forecast Data:", data);
+
+        let forecastHTML = "<h3>5-Day Forecast:</h3><ul>";
+        data.list.forEach((forecastItem, index) => {
+            // Only display data for every 8th item (3-hour interval * 8 = daily)
+            if (index % 8 === 0) {
+                forecastHTML += `
+                    <li>
+                        <strong>${forecastItem.dt_txt}</strong>: 
+                        ${forecastItem.main.temp}°C, 
+                        ${forecastItem.weather[0].description}
+                    </li>`;
+            }
+        });
+        forecastHTML += "</ul>";
+        forecast.innerHTML = forecastHTML;
     });
 
     country.value = "";
